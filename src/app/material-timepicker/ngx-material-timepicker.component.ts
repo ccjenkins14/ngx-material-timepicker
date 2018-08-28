@@ -4,7 +4,7 @@ import {TimePeriod} from './models/time-period.enum';
 import {merge, Subscription} from 'rxjs';
 import {NgxMaterialTimepickerService} from './services/ngx-material-timepicker.service';
 import {TimeUnit} from './models/time-unit.enum';
-import {animate, AnimationEvent, style, transition, trigger} from '@angular/animations';
+import {animate, AnimationEvent, style, transition, trigger, state} from '@angular/animations';
 import {NgxMaterialTimepickerEventService,} from './services/ngx-material-timepicker-event.service';
 import {filter} from 'rxjs/operators';
 import {TimepickerDirective} from './directives/ngx-timepicker.directive';
@@ -12,7 +12,8 @@ import {Moment} from 'moment';
 
 export enum AnimationState {
     ENTER = 'enter',
-    LEAVE = 'leave'
+    LEAVE = 'leave',
+    VOID = 'void'
 }
 
 const ESCAPE = 27;
@@ -23,15 +24,16 @@ const ESCAPE = 27;
     styleUrls: ['./ngx-material-timepicker.component.scss'],
     animations: [
         trigger('timepicker', [
-            transition(`* => ${AnimationState.ENTER}`, [
-                style({transform: 'translateY(-30%)'}),
-                animate('0.2s ease-out', style({transform: 'translateY(0)'}))
-            ]),
-            transition(`${AnimationState.ENTER} => ${AnimationState.LEAVE}`, [
-                style({transform: 'translateY(0)', opacity: 1}),
-                animate('0.2s ease-out', style({transform: 'translateY(-30%)', opacity: 0}))
-            ])
-        ])
+            state('void', style({
+              opacity: 0,
+              transform: 'scale(1, 0.8)'
+            })),
+            transition('void => enter',  animate('300ms cubic-bezier(0, 0, 0.2, 1)', style({
+              opacity: 1,
+              transform: 'scale(1, 1)'
+            }))),
+            transition('* => leave', animate('100ms linear', style({opacity: 0})))
+          ])
     ],
     providers: [NgxMaterialTimepickerService]
 })
@@ -46,7 +48,7 @@ export class NgxMaterialTimepickerComponent implements OnInit, OnDestroy {
     activeTimeUnit = TimeUnit.HOUR;
 
     isOpened = false;
-    animationState: AnimationState;
+    animationState: AnimationState = AnimationState.VOID
 
     timepickerInput: TimepickerDirective;
 
@@ -137,7 +139,7 @@ export class NgxMaterialTimepickerComponent implements OnInit, OnDestroy {
     close() {
         this.animationState = AnimationState.LEAVE;
     }
-
+    
     animationDone(event: AnimationEvent): void {
         if (event.phaseName === 'done' && event.toState === AnimationState.LEAVE) {
             this.isOpened = false;

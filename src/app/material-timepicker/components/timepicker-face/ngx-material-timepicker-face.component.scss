@@ -1,12 +1,12 @@
 @import "../../styles/config";
 
-$clock-face-number-color: #6c6c6c;
+$clock-face-number-color: #fff;
 
 .clock-face {
     width: 290px;
     height: 290px;
     border-radius: 50%;
-    background-color: #f0f0f0;
+    // background-color: #f0f0f0;
     position: relative;
     display: flex;
     justify-content: center;
